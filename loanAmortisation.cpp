@@ -6,6 +6,16 @@
 #include <iomanip>
 #include <math.h>
 
+// calculate payment per period
+// i = total simple interest | p = payments per annum
+// r = interest rate per period | n = total number of periods
+double calcPayment(const double& i, const int& p, const double& r, const int& n) {
+    double pmt;
+    pmt = i / (p * (1 - pow(1 + r, -n)));
+    return pmt;
+}
+
+// main function
 int main()
 {
 	// init base variables
@@ -18,17 +28,17 @@ int main()
 
 	std::cout << "Interest Rate (%): ";
 	std::cin >> interestRate;
-    interestRate = interestRate / 100;
+    interestRate /= 100;        // interest rate to actual value (i.e. 6% to 0.06)
 
 	std::cout << "Loan Term (Years): ";
 	std::cin >> loanTerm;
 
 	// calc payments
-	loanBalance = loanAmount;
-	double simpleInterest = loanBalance * interestRate;
-	double interestPerPeriod = interestRate / pmtPerAnnum;
-	int totalPeriods = pmtPerAnnum * loanTerm;
-	double monthlyPayment = simpleInterest / (pmtPerAnnum * (1 - pow(1 + interestPerPeriod, -totalPeriods)));
+	loanBalance = loanAmount;                                   // set starting loan balance as loan amount
+	double simpleInterest = loanBalance * interestRate;         // calculate simple interest for 1st year
+	double interestPerPeriod = interestRate / pmtPerAnnum;      // rate per period (month) from annual interest rate
+	int totalPeriods = pmtPerAnnum * loanTerm;                  // calc total periods (months)
+    double monthlyPayment = calcPayment(simpleInterest, pmtPerAnnum, interestPerPeriod, totalPeriods);      // calculate monthly P&I repayment
 	std::cout << "Monthly Payment: " << monthlyPayment << "\n";
 
 	// init table helpers
@@ -54,8 +64,8 @@ int main()
 		double periodInterest = interestPerPeriod * loanBalance;
 		double periodPrincipal = monthlyPayment - periodInterest;
 		double closeBalance = loanBalance - periodPrincipal;
-        totalInterest = totalInterest + periodInterest;
-        totalPrincipal = totalPrincipal + periodPrincipal;
+        totalInterest += periodInterest;
+        totalPrincipal += periodPrincipal;
 
 		std::cout << std::fixed << std::setprecision(2) << sep 
 				  << std::setw(int_width) << (i + 1) << sep
@@ -66,11 +76,11 @@ int main()
 				  << std::setw(dbl_width) << closeBalance << sep << "\n";
 
 		// update loan balance
-		loanBalance = loanBalance - periodPrincipal;
+		loanBalance -= periodPrincipal;
 
 	}
     std::cout << line << "\n";
-    
+
     std::cout << "Total Payments: " << (monthlyPayment * totalPeriods) << "\n";
     std::cout << "Total Interest: " << totalInterest << "\n";
     std::cout << "Total Principal: " << totalPrincipal << "\n";
